@@ -8,13 +8,23 @@ var window_size = Vector2(200, 200)
 var idle_timer = 0.0
 var is_idling = false
 
+var is_dragging = false
+var drag_offset = Vector2()
+
 @onready var animated_sprite = $AnimatedSprite2D
+@onready var area = $Area2D
 
 func _ready() -> void:
 	screen_size = Vector2(DisplayServer.screen_get_size())
 	animated_sprite.play("Walking")
+	area.input_event.connect(_on_area_input)
 
 func _physics_process(delta: float) -> void:
+	if is_dragging:
+		var mouse_pos = Vector2(DisplayServer.mouse_get_position())
+		var new_win_pos = mouse_pos - drag_offset
+		DisplayServer.window_set_position(Vector2i(new_win_pos))
+		return
 	if is_idling:
 		idle_timer -= delta
 		if idle_timer <= 0:
@@ -28,13 +38,14 @@ func _physics_process(delta: float) -> void:
 	window_position.y = clamp(window_position.y, 0, screen_size.y - window_size.y)
 	DisplayServer.window_set_position(Vector2i(window_position))
 	
-	if window_position.x <= 0 or window_position.x >= screen_size.x - window_size.x:
-		direction.x *= -1
-		animated_sprite.flip_h = !animated_sprite.flip_h
-		maybe_idle()
-	if window_position.y <= 0 or window_position.y >= screen_size.y - window_size.y:
-		direction.y *= -1
-		maybe_idle()
+	if !is_idling:
+		if window_position.x <= 0 or window_position.x >= screen_size.x - window_size.x:
+			direction.x *= -1
+			animated_sprite.flip_h = !animated_sprite.flip_h
+			maybe_idle()
+		if window_position.y <= 0 or window_position.y >= screen_size.y - window_size.y:
+			direction.y *= -1
+			maybe_idle()
 
 func maybe_idle():
 	if randf() < 0.3:
@@ -44,3 +55,38 @@ func maybe_idle():
 		if r == 0:
 			animated_sprite.play("Perched")
 			speed = 0
+		elif r == 1:
+			animated_sprite.play("Sleeping")
+			speed = 0
+		elif r == 2:
+			animated_sprite.play("Eating")
+			speed = 0
+
+func _on_area_input(_viewport, event, _shape_idx):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			is_dragging = true
+			var mouse_pos = Vector2(DisplayServer.mouse_get_position())
+			var win_pos = Vector2(DisplayServer.window_get_position())
+			drag_offset = mouse_pos - win_pos
+		else:
+			is_dragging = false
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
