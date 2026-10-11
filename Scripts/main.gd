@@ -16,7 +16,8 @@ var drag_offset = Vector2()
 
 func _ready() -> void:
 	screen_size = Vector2(DisplayServer.screen_get_size())
-	animated_sprite.play("Walking")
+	animated_sprite.flip_h = true
+	animated_sprite.play("Walk")
 	area.input_event.connect(_on_area_input)
 
 func _physics_process(delta: float) -> void:
@@ -30,7 +31,7 @@ func _physics_process(delta: float) -> void:
 		if idle_timer <= 0:
 			is_idling = false
 			speed = 300
-			animated_sprite.play("Walking")
+			animated_sprite.play("Walk")
 	var window_position = Vector2(DisplayServer.window_get_position())
 	window_position += direction * speed * delta
 	print(window_position)
@@ -53,13 +54,13 @@ func maybe_idle():
 		idle_timer = randf_range(1.0, 3.0)
 		var r = randi() % 3
 		if r == 0:
-			animated_sprite.play("Perched")
+			animated_sprite.play("Stretch")
 			speed = 0
 		elif r == 1:
-			animated_sprite.play("Sleeping")
+			animated_sprite.play("Go_to_sleep")
 			speed = 0
 		elif r == 2:
-			animated_sprite.play("Eating")
+			animated_sprite.play("Look_left")
 			speed = 0
 
 func _on_area_input(_viewport, event, _shape_idx):
