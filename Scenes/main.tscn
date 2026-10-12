@@ -87,10 +87,6 @@ region = Rect2(64, 64, 16, 16)
 atlas = ExtResource("2_bo1nx")
 region = Rect2(80, 64, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_3pmx8"]
-atlas = ExtResource("2_bo1nx")
-region = Rect2(64, 16, 16, 16)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_u50mg"]
 atlas = ExtResource("2_bo1nx")
 region = Rect2(0, 80, 16, 16)
@@ -257,9 +253,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_3pmx8")
-}, {
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_u50mg")
 }, {
 "duration": 1.0,
@@ -352,7 +345,7 @@ script = ExtResource("1_bo1nx")
 position = Vector2(100, 100)
 scale = Vector2(10, 10)
 sprite_frames = SubResource("SpriteFrames_6p6qw")
-animation = &"Walk"
+animation = &"Idle"
 
 [node name="Area2D" type="Area2D" parent="." unique_id=242710745]
 position = Vector2(100, 100)
