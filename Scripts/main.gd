@@ -18,6 +18,9 @@ var mouse_position = Vector2(DisplayServer.mouse_get_position())
 var last_mouse_position = Vector2()
 var is_going_to_sleep = false
 var go_to_sleep_timer = 0.0
+var is_sleeping = false
+var is_waking_up = false
+var wake_up_timer = 0.0
 
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var area = $Area2D
@@ -44,14 +47,34 @@ func _physics_process(delta: float) -> void:
 		mouse_no_movement = false
 		if is_going_to_sleep:
 			is_going_to_sleep = false
-			speed = 300
-			animated_sprite.play("Walk")
+			if is_sleeping:
+				is_sleeping = false
+				is_waking_up = true
+				var sprite_frames = animated_sprite.sprite_frames
+				var num_frames = sprite_frames.get_frame_count("Wake_up")
+				var anim_speed = animated_sprite.speed_scale * sprite_frames.get_animation_speed("Wake_up")
+				wake_up_timer = num_frames / anim_speed
+				animated_sprite.play("Wake_up")
+				speed = 0
+			else:
+				speed = 300
+				animated_sprite.play("Walk")
 	last_mouse_position = mouse_position
 
 	if is_going_to_sleep:
 		go_to_sleep_timer -= delta
-		if go_to_sleep_timer <= 0 and animated_sprite.sprite_frames.has_animation("Sleep"):
-			animated_sprite.play("Sleep")
+		if go_to_sleep_timer <= 0:
+			is_sleeping = true
+			if animated_sprite.sprite_frames.has_animation("Sleep"):
+				animated_sprite.play("Sleep")
+		return
+		
+	if is_waking_up:
+		wake_up_timer -= delta
+		if wake_up_timer <= 0:
+			is_waking_up = false
+			speed = 300
+			animated_sprite.play("Walk")
 		return
 
 	if is_idling:
@@ -136,9 +159,9 @@ func _on_area_input(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			is_dragging = true
-			# CHANGED: wake up when picked up
 			if is_going_to_sleep:
 				is_going_to_sleep = false
+				is_sleeping = false
 				mouse_no_movement = false
 				mouse_no_movement_timer = 8.0
 				speed = 300
