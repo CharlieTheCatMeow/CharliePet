@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dhp84elb350ey" path="res://Scripts/main.gd" id="1_bo1nx"]
 [ext_resource type="Texture2D" uid="uid://cafchgvt6g7b0" path="res://Assets/CharliePet.png" id="2_bo1nx"]
+[ext_resource type="AudioStream" uid="uid://d1ajxmietcoss" path="res://Assets/meow.mp3" id="3_8gbba"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8gbba"]
 atlas = ExtResource("2_bo1nx")
@@ -420,6 +421,14 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bo1nx"]
 size = Vector2(180, 180)
 
+[sub_resource type="Curve" id="Curve_6p6qw"]
+_data = [Vector2(0, 0.10112369), 0.0, 0.0, 0, 0, Vector2(0.4521277, 0.23595512), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_jjvhh"]
+offsets = PackedFloat32Array(0.012345679, 1)
+colors = PackedColorArray(1, 1, 1, 0.5294118, 1, 1, 1, 0)
+
 [node name="Pet" type="Node2D" unique_id=629739259]
 script = ExtResource("1_bo1nx")
 
@@ -427,12 +436,31 @@ script = ExtResource("1_bo1nx")
 position = Vector2(100, 100)
 scale = Vector2(10, 10)
 sprite_frames = SubResource("SpriteFrames_6p6qw")
-animation = &"Wake_up"
-frame = 2
-frame_progress = 0.3463745
+animation = &"Idle"
 
 [node name="Area2D" type="Area2D" parent="." unique_id=242710745]
 position = Vector2(100, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=2121485684]
 shape = SubResource("RectangleShape2D_bo1nx")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1532123958]
+stream = ExtResource("3_8gbba")
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="." unique_id=856705692]
+position = Vector2(100, 110)
+emitting = false
+lifetime = 0.3
+one_shot = true
+explosiveness = 1.0
+emission_shape = 3
+emission_rect_extents = Vector2(36.66, 18.045)
+direction = Vector2(0, -1)
+gravity = Vector2(0, 0)
+initial_velocity_min = 160.0
+initial_velocity_max = 320.0
+scale_amount_min = 49.5
+scale_amount_max = 59.41
+scale_amount_curve = SubResource("Curve_6p6qw")
+color = Color(1, 1, 1, 0.24313726)
+color_ramp = SubResource("Gradient_jjvhh")

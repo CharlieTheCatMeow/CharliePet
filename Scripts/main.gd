@@ -22,10 +22,22 @@ var is_sleeping = false
 var is_waking_up = false
 var wake_up_timer = 0.0
 
+var pet_sit = false
+
 @onready var animated_sprite = $AnimatedSprite2D
 @onready var area = $Area2D
+@onready var audio_player = $AudioStreamPlayer
+@onready var particles = $CPUParticles2D
+
+@onready var original_scale = animated_sprite.scale
 
 func _ready() -> void:
+	DisplayServer.window_set_mouse_passthrough(PackedVector2Array([
+		Vector2(16, 16),
+		Vector2(184, 16),
+		Vector2(184, 184),
+		Vector2(16, 184)
+	]))
 	screen_size = Vector2(DisplayServer.screen_get_size())
 	animated_sprite.flip_h = true
 	animated_sprite.play("Walk")
@@ -57,8 +69,11 @@ func _physics_process(delta: float) -> void:
 				animated_sprite.play("Wake_up")
 				speed = 0
 			else:
-				speed = 300
-				animated_sprite.play("Walk")
+				if not pet_sit:
+					speed = 300
+					animated_sprite.play("Walk")
+				else:
+					animated_sprite.play("Idle")
 	last_mouse_position = mouse_position
 
 	if is_going_to_sleep:
@@ -73,8 +88,11 @@ func _physics_process(delta: float) -> void:
 		wake_up_timer -= delta
 		if wake_up_timer <= 0:
 			is_waking_up = false
-			speed = 300
-			animated_sprite.play("Walk")
+			if not pet_sit:
+				speed = 300
+				animated_sprite.play("Walk")
+			else:
+				animated_sprite.play("Idle")
 		return
 
 	if is_idling:
@@ -82,14 +100,17 @@ func _physics_process(delta: float) -> void:
 		if idle_timer <= 0:
 			is_idling = false
 			idle_cooldown = 4.0
-			speed = 300
-			animated_sprite.play("Walk")
+			if not pet_sit:
+				speed = 300
+				animated_sprite.play("Walk")
+			else:
+				animated_sprite.play("Idle")
 	else:
 		idle_cooldown -= delta
 	var window_position = Vector2(DisplayServer.window_get_position())
 	direction = window_position.direction_to(mouse_position)
 	if window_position.distance_to(mouse_position) >= 100:
-		if !is_idling:
+		if !is_idling and not pet_sit:
 			animated_sprite.play("Walk")
 		window_position += direction * speed * delta
 		window_position.x = clamp(window_position.x, 0, screen_size.x - window_size.x)
@@ -119,7 +140,7 @@ func _physics_process(delta: float) -> void:
 		go_to_sleep_timer = num_frames / anim_speed
 		animated_sprite.play(animation_name)
 		speed = 0
-	if not mouse_no_movement:
+	if not mouse_no_movement and not pet_sit:
 		speed = 300
 
 	DisplayServer.window_set_position(Vector2i(window_position))
@@ -158,16 +179,28 @@ func maybe_idle():
 func _on_area_input(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
+			pop_animation()
+			pet_sit = !pet_sit
+			speed = 0
 			is_dragging = true
 			if is_going_to_sleep:
 				is_going_to_sleep = false
 				is_sleeping = false
 				mouse_no_movement = false
 				mouse_no_movement_timer = 8.0
-				speed = 300
+				if not pet_sit:
+					speed = 300
 				animated_sprite.play("Walk")
 			var mouse_pos = Vector2(DisplayServer.mouse_get_position())
 			var win_pos = Vector2(DisplayServer.window_get_position())
 			drag_offset = mouse_pos - win_pos
 		else:
 			is_dragging = false
+
+func pop_animation() -> void:
+	var tween = create_tween()
+	tween.tween_property(animated_sprite, "scale", original_scale * 0.9, 0.1)
+	tween.tween_property(animated_sprite, "scale", original_scale, 0.1)
+	audio_player.play()
+	particles.restart()
+		
