@@ -9,8 +9,12 @@ var idle_timer = 0.0
 var idle_cooldown = 0
 var is_idling = false
 
+const DRAG_THRESHOLD = 6.0
 var is_dragging = false
 var drag_offset = Vector2()
+
+var is_pressed = false
+var press_mouse_pos = Vector2()
 
 var mouse_no_movement = false
 var mouse_no_movement_timer = 8.0
@@ -44,10 +48,12 @@ func _ready() -> void:
 	area.input_event.connect(_on_area_input)
 
 func _physics_process(delta: float) -> void:
-	if is_dragging:
+	if is_pressed:
 		var mouse_pos = Vector2(DisplayServer.mouse_get_position())
-		var new_win_pos = mouse_pos - drag_offset
-		DisplayServer.window_set_position(Vector2i(new_win_pos))
+		if mouse_pos.distance_to(press_mouse_pos) > 6:
+			is_dragging = true
+		if is_dragging:
+			DisplayServer.window_set_position(Vector2i(mouse_pos - drag_offset))
 		return
 
 	mouse_position = Vector2(DisplayServer.mouse_get_position())
@@ -179,10 +185,8 @@ func maybe_idle():
 func _on_area_input(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			pop_animation()
-			pet_sit = !pet_sit
-			speed = 0
-			is_dragging = true
+			is_pressed = true
+			press_mouse_pos = Vector2(DisplayServer.mouse_get_position())
 			if is_going_to_sleep:
 				is_going_to_sleep = false
 				is_sleeping = false
@@ -195,7 +199,12 @@ func _on_area_input(_viewport, event, _shape_idx):
 			var win_pos = Vector2(DisplayServer.window_get_position())
 			drag_offset = mouse_pos - win_pos
 		else:
+			if is_pressed and not is_dragging:
+				pop_animation()
+				pet_sit = !pet_sit
+				speed = 0
 			is_dragging = false
+			is_pressed = false
 
 func pop_animation() -> void:
 	var tween = create_tween()

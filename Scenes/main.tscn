@@ -402,7 +402,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_gsvbx")
 }],
-"loop": 1,
+"loop": 0,
 "name": &"Wake_up",
 "speed": 5.0
 }, {
@@ -436,7 +436,7 @@ script = ExtResource("1_bo1nx")
 position = Vector2(100, 100)
 scale = Vector2(10, 10)
 sprite_frames = SubResource("SpriteFrames_6p6qw")
-animation = &"Idle"
+animation = &"Go_to_sleep"
 
 [node name="Area2D" type="Area2D" parent="." unique_id=242710745]
 position = Vector2(100, 100)
